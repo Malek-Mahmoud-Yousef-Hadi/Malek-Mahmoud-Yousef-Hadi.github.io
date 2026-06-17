@@ -38,26 +38,47 @@ window.addEventListener('load', () => {
     // Create a wrapper for scaling
     const wrapper = document.createElement('div');
     wrapper.style.position = 'relative';
-    wrapper.style.width = '1200px';
-    wrapper.style.height = '800px';
+    wrapper.style.width = `${baseWidth}px`;
+    wrapper.style.height = `${baseHeight}px`;
     wrapper.style.transformOrigin = 'top left';
     
     // Scaling logic for mobile
     function scaleRoadmap() {
+        const baseWidth = 1200; // Original design width
+        const baseHeight = 800; // Original design height
         const containerWidth = container.offsetWidth;
-        const scale = containerWidth / 1200;
-        if (scale < 1) {
-            wrapper.style.transform = `scale(${scale})`;
-            container.style.height = `${800 * scale}px`;
+        
+        let scale = 1;
+        if (containerWidth < baseWidth) {
+            scale = containerWidth / baseWidth;
+        }
+
+        wrapper.style.transform = `scale(${scale})`;
+        wrapper.style.transformOrigin = 'top center'; // Center the scaling
+        container.style.height = `${baseHeight * scale}px`;
+        container.style.width = `${baseWidth * scale}px`; // Adjust container width based on scale
+        container.style.margin = '0 auto'; // Center the container itself
+
+        // Adjust SVG dimensions to match scaled wrapper
+        svg.setAttribute("width", `${baseWidth * scale}`);
+        svg.setAttribute("height", `${baseHeight * scale}`);
+
+
         } else {
             wrapper.style.transform = 'none';
-            container.style.height = '800px';
+            container.style.height = `${baseHeight}px`;
+            container.style.width = `${baseWidth}px`;
+            container.style.margin = '0 auto';
+
+            // Reset SVG dimensions
+            svg.setAttribute("width", `${baseWidth}`);
+            svg.setAttribute("height", `${baseHeight}`);
         }
     }
 
     // Create SVG for connections
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("style", "position: absolute; top: 0; left: 0; width: 1200px; height: 800px; pointer-events: none; z-index: 5;");
+    svg.setAttribute("style", `position: absolute; top: 0; left: 0; width: ${baseWidth}px; height: ${baseHeight}px; pointer-events: none; z-index: 5;`);
     
     // Define arrowhead
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");

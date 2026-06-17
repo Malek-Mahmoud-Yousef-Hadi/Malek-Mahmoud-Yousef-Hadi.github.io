@@ -229,7 +229,9 @@ body.ghost-theme {
     background: #000;
     border: 1px solid var(--ghost-dim);
     padding: 2rem;
-    width: 100%;
+    max-width: 1200px; /* Max width for desktop */
+    margin: 0 auto; /* Center the container */
+    width: fit-content; /* Allow container to shrink-wrap content */
     overflow: hidden; /* Changed to hidden to allow JS scaling to handle it */
     position: relative;
 }
