@@ -165,17 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightbox = document.getElementById('cert-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxPdf = document.getElementById('lightbox-pdf');
-    const lightboxDownload = document.getElementById('lightbox-download');
     const closeBtn = document.querySelector('.close-lightbox');
 
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('view-cert-btn')) {
             const src = e.target.getAttribute('data-src');
             const type = e.target.getAttribute('data-type').toLowerCase();
-
-            // Set download link
-            lightboxDownload.href = src;
-            lightboxDownload.setAttribute('download', src.split('/').pop());
 
             if (type === 'png' || type === 'jpg' || type === 'jpeg') {
                 lightboxImg.src = src;
