@@ -6,11 +6,11 @@ window.addEventListener('load', () => {
     // Clear any existing content
     container.innerHTML = '';
 
-    const baseWidth = 1400; // Increased width to allow more space
-    const baseHeight = 800; // Original design height
-    const nodeWidth = 220; // Increased node width for text to "take its breath"
+    const baseWidth = 1400; // Original design width
+    const baseHeight = 850; // Increased base height to ensure bottom nodes are visible
+    const nodeWidth = 220; // Expanded node width
 
-    // Nodes definition with absolute virtual coordinates (Adjusted X for wider nodes)
+    // Nodes definition with absolute virtual coordinates
     const nodes = [
         { id: 'A', title: 'Network Fundamental', x: 20, y: 300, type: 'start' },
         { id: 'L', title: 'BSc Cybersecurity (Al al-Bayt)', x: 20, y: 50, type: 'isolated' },
@@ -44,7 +44,7 @@ window.addEventListener('load', () => {
     wrapper.style.position = 'relative';
     wrapper.style.width = `${baseWidth}px`;
     wrapper.style.height = `${baseHeight}px`;
-    wrapper.style.transformOrigin = 'top left'; // Aligned to left as requested
+    wrapper.style.transformOrigin = 'top left';
     
     // Create SVG for connections
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -74,15 +74,15 @@ window.addEventListener('load', () => {
         const containerWidth = container.offsetWidth;
         let scale = 1;
         
-        // Always scale to fit if container is smaller than our base
         if (containerWidth < baseWidth) {
             scale = containerWidth / baseWidth;
         }
 
         wrapper.style.transform = `scale(${scale})`;
-        container.style.height = `${baseHeight * scale}px`;
+        // Add extra padding to container height on mobile to ensure visibility
+        const extraPadding = containerWidth < 768 ? 50 : 0;
+        container.style.height = `${(baseHeight * scale) + extraPadding}px`;
         container.style.width = '100%';
-        wrapper.style.margin = '0'; // Align to left
     }
 
     // Render Connections
@@ -91,11 +91,10 @@ window.addEventListener('load', () => {
         const end = nodes.find(n => n.id === conn.to);
         if (start && end) {
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            // Adjusted offsets for wider nodes (nodeWidth / 2 = 110)
             line.setAttribute("x1", start.x + 110);
-            line.setAttribute("y1", start.y + 20);
+            line.setAttribute("y1", start.y + 25);
             line.setAttribute("x2", end.x + 110);
-            line.setAttribute("y2", end.y + 20);
+            line.setAttribute("y2", end.y + 25);
             line.setAttribute("stroke", "#00ff41");
             line.setAttribute("stroke-width", "1");
             line.setAttribute("marker-end", "url(#arrowhead)");
@@ -116,16 +115,16 @@ window.addEventListener('load', () => {
         div.style.padding = '12px';
         div.style.backgroundColor = '#000';
         div.style.color = '#00ff41';
-        div.style.fontSize = '0.85rem'; // Slightly larger font
+        div.style.fontSize = '0.85rem';
         div.style.zIndex = '10';
-        div.style.width = `${nodeWidth}px`; // Use expanded width
+        div.style.width = `${nodeWidth}px`;
         div.style.textAlign = 'center';
         div.style.boxShadow = '0 0 10px rgba(0, 255, 65, 0.2)';
         div.style.textTransform = 'uppercase';
         div.style.display = 'flex';
         div.style.alignItems = 'center';
         div.style.justifyContent = 'center';
-        div.style.minHeight = '50px'; // Ensure height is consistent
+        div.style.minHeight = '50px';
         wrapper.appendChild(div);
     });
 
