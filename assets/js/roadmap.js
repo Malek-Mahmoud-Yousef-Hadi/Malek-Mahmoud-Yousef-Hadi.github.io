@@ -6,6 +6,7 @@ window.addEventListener('load', () => {
     // Clear any existing content
     container.innerHTML = '';
 
+    // Nodes definition with absolute virtual coordinates
     const nodes = [
         { id: 'A', title: 'Network Fundamental', x: 50, y: 300, type: 'start' },
         { id: 'L', title: 'BSc Cybersecurity (Al al-Bayt)', x: 50, y: 50, type: 'isolated' },
@@ -34,6 +35,26 @@ window.addEventListener('load', () => {
         { from: 'I', to: 'J' },
     ];
 
+    // Create a wrapper for scaling
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.width = '1200px';
+    wrapper.style.height = '800px';
+    wrapper.style.transformOrigin = 'top left';
+    
+    // Scaling logic for mobile
+    function scaleRoadmap() {
+        const containerWidth = container.offsetWidth;
+        const scale = containerWidth / 1200;
+        if (scale < 1) {
+            wrapper.style.transform = `scale(${scale})`;
+            container.style.height = `${800 * scale}px`;
+        } else {
+            wrapper.style.transform = 'none';
+            container.style.height = '800px';
+        }
+    }
+
     // Create SVG for connections
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("style", "position: absolute; top: 0; left: 0; width: 1200px; height: 800px; pointer-events: none; z-index: 5;");
@@ -53,6 +74,7 @@ window.addEventListener('load', () => {
     marker.appendChild(polygon);
     defs.appendChild(marker);
     svg.appendChild(defs);
+    wrapper.appendChild(svg);
 
     // Render Connections
     connections.forEach(conn => {
@@ -72,8 +94,6 @@ window.addEventListener('load', () => {
         }
     });
 
-    container.appendChild(svg);
-
     // Render Nodes
     nodes.forEach(node => {
         const div = document.createElement('div');
@@ -92,6 +112,10 @@ window.addEventListener('load', () => {
         div.style.textAlign = 'center';
         div.style.boxShadow = '0 0 10px rgba(0, 255, 65, 0.2)';
         div.style.textTransform = 'uppercase';
-        container.appendChild(div);
+        wrapper.appendChild(div);
     });
+
+    container.appendChild(wrapper);
+    scaleRoadmap();
+    window.addEventListener('resize', scaleRoadmap);
 });

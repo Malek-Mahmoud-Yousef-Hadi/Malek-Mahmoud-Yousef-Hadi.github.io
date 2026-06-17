@@ -230,7 +230,8 @@ body.ghost-theme {
     border: 1px solid var(--ghost-dim);
     padding: 2rem;
     width: 100%;
-    overflow-x: auto; /* Allow horizontal scroll on mobile if needed */
+    overflow: hidden; /* Changed to hidden to allow JS scaling to handle it */
+    position: relative;
 }
 
 /* Next Level Goals */
