@@ -22,7 +22,9 @@ const MalekConfig = {
     education: [
         //"Bachelor-Degree-Arabic.pdf",
         //"Bachelor-Degree-English.pdf"
-        "com.png"
+       // "com.png"
+       "My-Education-AR.pdf",
+       "My-Education-EN.pdf"
     ],
 
     // List your CV files here (must be in /cv folder)
