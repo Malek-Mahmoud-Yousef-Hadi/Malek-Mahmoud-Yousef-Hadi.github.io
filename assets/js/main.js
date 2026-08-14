@@ -134,43 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function forceDownload(url, filename) {
-        fetch(url)
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.blob();
-            })
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = blobUrl;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(blobUrl);
-                document.body.removeChild(a);
-            })
-            .catch(() => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-    }
-
-    document.addEventListener('click', event => {
-        const downloadBtn = event.target.closest('.download-work-btn, .project-download-btn');
-        if (!downloadBtn) return;
-        event.preventDefault();
-        const url = downloadBtn.getAttribute('href');
-        const filename = downloadBtn.getAttribute('download') || url.split('/').pop();
-        forceDownload(url, filename);
-    });
-
     function renderProjects() {
         const container = document.getElementById('projects-list');
         if (!container || !window.MalekConfig) return;
@@ -227,7 +190,44 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProjects();
     }
 
-    // Document preview for certificates, CV, and professional experience
+    // Intelligent Background Blob Preparation for PDFs to prevent browser blocking and viewer opening
+    const preparedBlobs = {};
+
+    function prepareBlobForLink(linkEl) {
+        const href = linkEl.getAttribute('href');
+        if (!href || preparedBlobs[href] || getFileExtension(href) !== 'pdf') return;
+        
+        fetch(href)
+            .then(res => res.blob())
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                preparedBlobs[href] = blobUrl;
+                linkEl.setAttribute('href', blobUrl);
+            })
+            .catch(() => {
+                // Fallback to original href if fetch fails
+            });
+    }
+
+    // Pre-prepare blobs when user hovers or focuses on download buttons
+    document.addEventListener('mouseover', event => {
+        const btn = event.target.closest('.download-work-btn, .project-download-btn');
+        if (btn) prepareBlobForLink(btn);
+    });
+
+    document.addEventListener('focusin', event => {
+        const btn = event.target.closest('.download-work-btn, .project-download-btn');
+        if (btn) prepareBlobForLink(btn);
+    });
+
+    // Also prepare immediately on render for smooth experience
+    window.setTimeout(() => {
+        document.querySelectorAll('.download-work-btn, .project-download-btn').forEach(btn => {
+            prepareBlobForLink(btn);
+        });
+    }, 500);
+
+    // Document preview for certificates and CVs
     const lightbox = document.getElementById('cert-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxPdf = document.getElementById('lightbox-pdf');
