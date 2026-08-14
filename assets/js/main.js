@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Matrix Effect
     const canvas = document.getElementById('matrix-bg');
-    const ctx = canvas ? canvas.getContext('2d') : null;
-    if (canvas && ctx) {
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function renderCerts(containerId, fileList, folder) {
         const container = document.getElementById(containerId);
-        if (!container || !Array.isArray(fileList)) return;
+        if (!container) return;
 
         // Group files by name to handle PDF/PNG pairs
         const groups = {};
@@ -109,19 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(groups).forEach(name => {
             const group = groups[name];
             const isPdf = !!group.pdf;
-            const isPng = !!group.png || !!group.jpg || !!group.jpeg;
-            const mainFile = isPdf ? group.pdf : (group.png || group.jpg || group.jpeg);
-            if (!mainFile) return;
-
+            const isPng = !!group.png;
+            const mainFile = isPdf ? group.pdf : group.png;
             const type = isPdf ? 'pdf' : 'png';
-            const preview = group.png || group.jpg || group.jpeg;
+            const preview = isPng ? `${folder}/${group.png}` : null;
 
             const card = document.createElement('div');
             card.className = 'cert-card';
             
             let visual = '';
             if (preview) {
-                visual = `<img src="${folder}/${preview}" class="cert-preview" alt="Certificate">`;
+                visual = `<img src="${preview}" class="cert-preview" alt="Certificate">`;
             } else {
                 visual = `
                     <div class="pdf-visual-placeholder">
@@ -140,9 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProjects() {
         const container = document.getElementById('projects-list');
-        if (!container || !window.MalekConfig || !window.MalekConfig.projects) return;
+        if (!container) return;
 
-        window.MalekConfig.projects.forEach(proj => {
+        MalekConfig.projects.forEach(proj => {
             const row = document.createElement('div');
             row.className = 'project-row';
             
@@ -155,9 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${proj.hasPassword ? '<span class="pass-hint">PASS: infected</span>' : ''}
                     <a href="${filePath}" 
                        class="ghost-btn ${proj.hasPassword ? 'warn-btn' : ''}" 
-                       download="${proj.id}.${format}"
-                       target="_blank"
-                       rel="noopener noreferrer">
+                       download="${proj.id}.${format}">
                         [ DOWNLOAD_${format.toUpperCase()} ]
                     </a>
                 </div>
@@ -189,9 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="experience-description">${work.description}</p>
                 <a href="${filePath}" 
                    class="ghost-btn download-work-btn" 
-                   download="${work.file}"
-                   target="_blank"
-                   rel="noopener noreferrer">
+                   download="${work.file}">
                     [ download-work ]
                 </a>
             `;
