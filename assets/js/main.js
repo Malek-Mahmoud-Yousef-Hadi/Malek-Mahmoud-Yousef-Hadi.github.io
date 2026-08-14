@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="proj-name">${project.name}</span>
                 <div class="download-container">
                     ${project.hasPassword ? '<span class="pass-hint">PASS: infected</span>' : ''}
-                    <a href="${filePath}" class="ghost-btn ${project.hasPassword ? 'warn-btn' : ''}" download="${project.id}.${format}">
+                    <a href="${filePath}" class="ghost-btn ${project.hasPassword ? 'warn-btn' : ''}" download="${project.id}.${format}" target="_blank" rel="noopener noreferrer">
                         [ DOWNLOAD_${format.toUpperCase()} ]
                     </a>
                 </div>
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <p class="experience-description">${work.description}</p>
-                <a href="${filePath}" class="ghost-btn download-work-btn" download="${work.file}">[ download-work ]</a>
+                <a href="${filePath}" class="ghost-btn download-work-btn" download="${work.file}" target="_blank" rel="noopener noreferrer">[ download-work ]</a>
             `;
             container.appendChild(card);
         });
