@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Decipher Effect for Titles
+    // Decipher Effect for Titles (isolated to prevent any interference with clicks)
     const headers = document.querySelectorAll('.section-header');
     headers.forEach(header => {
         const originalText = header.innerText;
@@ -97,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById(containerId);
         if (!container) return;
 
-        // Group files by name to handle PDF/PNG pairs
         const groups = {};
         fileList.forEach(file => {
             const name = file.substring(0, file.lastIndexOf('.'));
@@ -130,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 ${visual}
-                <button class="ghost-btn view-cert-btn" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
+                <button class="ghost-btn view-cert-btn" type="button" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
             `;
             container.appendChild(card);
         });
@@ -138,15 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProjects() {
         const container = document.getElementById('projects-list');
-        if (!container) return;
+        if (!container || !window.MalekConfig || !window.MalekConfig.projects) return;
 
-        MalekConfig.projects.forEach(proj => {
+        window.MalekConfig.projects.forEach(proj => {
             const row = document.createElement('div');
             row.className = 'project-row';
             
             const format = proj.format || 'zip';
             const filePath = `projects/${proj.id}.${format}`;
 
+            // Pure native link: no target="_blank", no JS interception.
+            // This is the absolute safest way to prevent browser multiple download warnings.
             row.innerHTML = `
                 <span class="proj-name">${proj.name}</span>
                 <div class="download-container">
@@ -171,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'experience-card';
             const filePath = `work_experience/${work.file}`;
 
+            // Pure native link: no target="_blank", no JS interception.
             card.innerHTML = `
                 <div class="experience-card-header">
                     <div>
@@ -201,32 +203,37 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProjects();
     }
 
-    // Lightbox Logic (Dynamic delegation)
+    // Lightbox Logic (scoped safely to certs list container)
     const lightbox = document.getElementById('cert-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxPdf = document.getElementById('lightbox-pdf');
     const closeBtn = document.querySelector('.close-lightbox');
 
-    document.addEventListener('click', (e) => {
+    const certsContainer = document.getElementById('certs-list');
+    const cvContainer = document.getElementById('cv-list');
+
+    function handleViewClick(e) {
         const btn = e.target.closest('.view-cert-btn');
-        if (btn) {
-            const src = btn.getAttribute('data-src');
-            const type = btn.getAttribute('data-type').toLowerCase();
+        if (!btn) return;
+        const src = btn.getAttribute('data-src');
+        const type = btn.getAttribute('data-type').toLowerCase();
 
-            if (type === 'png' || type === 'jpg' || type === 'jpeg') {
-                lightboxImg.src = src;
-                lightboxImg.style.display = 'block';
-                lightboxPdf.style.display = 'none';
-            } else if (type === 'pdf') {
-                lightboxPdf.src = src;
-                lightboxPdf.style.display = 'block';
-                lightboxImg.style.display = 'none';
-            }
-
-            lightbox.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+        if (type === 'png' || type === 'jpg' || type === 'jpeg') {
+            lightboxImg.src = src;
+            lightboxImg.style.display = 'block';
+            lightboxPdf.style.display = 'none';
+        } else if (type === 'pdf') {
+            lightboxPdf.src = src;
+            lightboxPdf.style.display = 'block';
+            lightboxImg.style.display = 'none';
         }
-    });
+
+        lightbox.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    if (certsContainer) certsContainer.addEventListener('click', handleViewClick);
+    if (cvContainer) cvContainer.addEventListener('click', handleViewClick);
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
