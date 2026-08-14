@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="proj-name">${project.name}</span>
                 <div class="download-container">
                     ${project.hasPassword ? '<span class="pass-hint">PASS: infected</span>' : ''}
-                    <a href="${filePath}" class="ghost-btn project-download-btn ${project.hasPassword ? 'warn-btn' : ''}" download="${project.id}.${format}">
+                    <a href="${filePath}" class="ghost-btn ${project.hasPassword ? 'warn-btn' : ''}" download="${project.id}.${format}">
                         [ DOWNLOAD_${format.toUpperCase()} ]
                     </a>
                 </div>
@@ -189,43 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderWorkExperience();
         renderProjects();
     }
-
-    // Intelligent Background Blob Preparation for PDFs to prevent browser blocking and viewer opening
-    const preparedBlobs = {};
-
-    function prepareBlobForLink(linkEl) {
-        const href = linkEl.getAttribute('href');
-        if (!href || preparedBlobs[href] || getFileExtension(href) !== 'pdf') return;
-        
-        fetch(href)
-            .then(res => res.blob())
-            .then(blob => {
-                const blobUrl = window.URL.createObjectURL(blob);
-                preparedBlobs[href] = blobUrl;
-                linkEl.setAttribute('href', blobUrl);
-            })
-            .catch(() => {
-                // Fallback to original href if fetch fails
-            });
-    }
-
-    // Pre-prepare blobs when user hovers or focuses on download buttons
-    document.addEventListener('mouseover', event => {
-        const btn = event.target.closest('.download-work-btn, .project-download-btn');
-        if (btn) prepareBlobForLink(btn);
-    });
-
-    document.addEventListener('focusin', event => {
-        const btn = event.target.closest('.download-work-btn, .project-download-btn');
-        if (btn) prepareBlobForLink(btn);
-    });
-
-    // Also prepare immediately on render for smooth experience
-    window.setTimeout(() => {
-        document.querySelectorAll('.download-work-btn, .project-download-btn').forEach(btn => {
-            prepareBlobForLink(btn);
-        });
-    }, 500);
 
     // Document preview for certificates and CVs
     const lightbox = document.getElementById('cert-lightbox');
