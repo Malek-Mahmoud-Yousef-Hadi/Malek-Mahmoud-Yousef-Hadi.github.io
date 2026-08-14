@@ -1,150 +1,190 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Matrix Effect
+    // Matrix background
     const canvas = document.getElementById('matrix-bg');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
     const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = 1;
+    let drops = [];
+
+    function resizeMatrix() {
+        if (!canvas || !ctx) return;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drops = Array.from({ length: Math.ceil(canvas.width / fontSize) }, () => 1);
+    }
 
     function drawMatrix() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        if (!canvas || !ctx) return;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#00ff41";
-        ctx.font = fontSize + "px arial";
-        for (let i = 0; i < drops.length; i++) {
-            const text = letters.charAt(Math.floor(Math.random() * letters.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-            drops[i]++;
-        }
-    }
-    setInterval(drawMatrix, 33);
+        ctx.fillStyle = '#00ff41';
+        ctx.font = `${fontSize}px arial`;
 
-    // Decipher Effect for Titles
+        drops.forEach((drop, index) => {
+            const text = letters.charAt(Math.floor(Math.random() * letters.length));
+            ctx.fillText(text, index * fontSize, drop * fontSize);
+            if (drop * fontSize > canvas.height && Math.random() > 0.975) drops[index] = 0;
+            drops[index] += 1;
+        });
+    }
+
+    resizeMatrix();
+    window.addEventListener('resize', resizeMatrix);
+    window.setInterval(drawMatrix, 33);
+
+    // Decipher effect for section headers
     const headers = document.querySelectorAll('.section-header');
     headers.forEach(header => {
         const originalText = header.innerText;
         header.addEventListener('mouseover', () => {
             let iterations = 0;
-            const interval = setInterval(() => {
-                header.innerText = originalText.split("").map((letter, index) => {
+            const interval = window.setInterval(() => {
+                header.innerText = originalText.split('').map((letter, index) => {
                     if (index < iterations) return originalText[index];
                     return letters[Math.floor(Math.random() * 26)];
-                }).join("");
-                if (iterations >= originalText.length) clearInterval(interval);
+                }).join('');
+                if (iterations >= originalText.length) window.clearInterval(interval);
                 iterations += 1 / 3;
             }, 30);
         });
     });
 
-    // Hacker Console Logs
+    // Hacker console logs
     const consoleEl = document.getElementById('hacker-console');
     const logs = [
-        "Initializing scan...",
-        "Target: 192.168.1.104",
-        "Bypassing firewall...",
-        "Accessing kernel...",
-        "Buffer overflow detected",
-        "Ghost operator active",
-        "Encryption: AES-256",
-        "Deciphering BSc Degree...",
-        "Tracing network path...",
-        "SOC Alert: Tier 3 response"
+        'Initializing scan...',
+        'Target: 192.168.1.104',
+        'Bypassing firewall...',
+        'Accessing kernel...',
+        'Buffer overflow detected',
+        'Ghost operator active',
+        'Encryption: AES-256',
+        'Deciphering professional experience...',
+        'Tracing network path...',
+        'SOC Alert: Tier 3 response'
     ];
-    setInterval(() => {
-        const p = document.createElement('p');
-        p.innerText = `> ${logs[Math.floor(Math.random() * logs.length)]}`;
-        consoleEl.appendChild(p);
-        if (consoleEl.childNodes.length > 8) consoleEl.removeChild(consoleEl.firstChild);
-    }, 2000);
 
-    // Cursor Trail
-    document.addEventListener('mousemove', (e) => {
+    if (consoleEl) {
+        window.setInterval(() => {
+            const p = document.createElement('p');
+            p.innerText = `> ${logs[Math.floor(Math.random() * logs.length)]}`;
+            consoleEl.appendChild(p);
+            if (consoleEl.childNodes.length > 8) consoleEl.removeChild(consoleEl.firstChild);
+        }, 2000);
+    }
+
+    // Cursor trail
+    document.addEventListener('mousemove', event => {
         const trail = document.getElementById('cursor-trail');
-        if (trail) {
-            trail.style.left = e.clientX + 'px';
-            trail.style.top = e.clientY + 'px';
-        }
+        if (!trail) return;
+        trail.style.left = `${event.clientX}px`;
+        trail.style.top = `${event.clientY}px`;
     });
 
-    // Smooth scroll
+    // Smooth navigation
     document.querySelectorAll('.side-nav a').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
+        anchor.addEventListener('click', event => {
+            event.preventDefault();
+            const target = document.querySelector(anchor.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
         });
     });
 
-    // --- STATIC CONTENT INJECTION ---
-    
-    function renderCerts(containerId, fileList, folder) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
+    function getFileExtension(file) {
+        const dot = file.lastIndexOf('.');
+        return dot === -1 ? '' : file.slice(dot + 1).toLowerCase();
+    }
 
-        // Group files by name to handle PDF/PNG pairs
+    function getBaseName(file) {
+        const dot = file.lastIndexOf('.');
+        return dot === -1 ? file : file.slice(0, dot);
+    }
+
+    function renderDocumentCards(containerId, fileList, folder) {
+        const container = document.getElementById(containerId);
+        if (!container || !Array.isArray(fileList)) return;
+
         const groups = {};
         fileList.forEach(file => {
-            const name = file.substring(0, file.lastIndexOf('.'));
-            const ext = file.substring(file.lastIndexOf('.') + 1).toLowerCase();
+            const name = getBaseName(file);
+            const ext = getFileExtension(file);
             if (!groups[name]) groups[name] = {};
             groups[name][ext] = file;
         });
 
         Object.keys(groups).forEach(name => {
             const group = groups[name];
-            const isPdf = !!group.pdf;
-            const isPng = !!group.png;
-            const mainFile = isPdf ? group.pdf : group.png;
-            const type = isPdf ? 'pdf' : 'png';
-            const preview = isPng ? `${folder}/${group.png}` : null;
+            const mainFile = group.pdf || group.png || group.jpg || group.jpeg;
+            if (!mainFile) return;
 
+            const type = getFileExtension(mainFile);
+            const preview = group.png || group.jpg || group.jpeg;
             const card = document.createElement('div');
             card.className = 'cert-card';
-            
-            let visual = '';
-            if (preview) {
-                visual = `<img src="${preview}" class="cert-preview" alt="Certificate">`;
-            } else {
-                visual = `
-                    <div class="pdf-visual-placeholder">
-                        <div class="ghost-badge">SECURE_DOC</div>
-                        <div class="ghost-icon-pdf"></div>
-                    </div>`;
-            }
+
+            const visual = preview
+                ? `<img src="${folder}/${preview}" class="cert-preview" alt="${name} preview">`
+                : `<div class="pdf-visual-placeholder"><div class="ghost-badge">SECURE_DOC</div><div class="ghost-icon-pdf"></div></div>`;
 
             card.innerHTML = `
                 ${visual}
-                <button class="ghost-btn view-cert-btn" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
+                <button class="ghost-btn view-cert-btn" type="button" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
             `;
             container.appendChild(card);
         });
     }
 
+    function forceDownload(url, filename) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.blob();
+            })
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(a);
+            })
+            .catch(() => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+    }
+
+    document.addEventListener('click', event => {
+        const downloadBtn = event.target.closest('.download-work-btn, .project-download-btn');
+        if (!downloadBtn) return;
+        event.preventDefault();
+        const url = downloadBtn.getAttribute('href');
+        const filename = downloadBtn.getAttribute('download') || url.split('/').pop();
+        forceDownload(url, filename);
+    });
+
     function renderProjects() {
         const container = document.getElementById('projects-list');
-        if (!container) return;
+        if (!container || !window.MalekConfig) return;
 
-        MalekConfig.projects.forEach(proj => {
+        window.MalekConfig.projects.forEach(project => {
+            const format = project.format || 'zip';
+            const filePath = `projects/${project.id}.${format}`;
             const row = document.createElement('div');
             row.className = 'project-row';
-            
-            const format = proj.format || 'zip';
-            const filePath = `projects/${proj.id}.${format}`;
-
             row.innerHTML = `
-                <span class="proj-name">${proj.name}</span>
+                <span class="proj-name">${project.name}</span>
                 <div class="download-container">
-                    ${proj.hasPassword ? '<span class="pass-hint">PASS: infected</span>' : ''}
-                    <a href="${filePath}" 
-                       class="ghost-btn ${proj.hasPassword ? 'warn-btn' : ''}" 
-                       download="${proj.id}.${format}"
-                       target="_blank">
+                    ${project.hasPassword ? '<span class="pass-hint">PASS: infected</span>' : ''}
+                    <a href="${filePath}" class="ghost-btn project-download-btn ${project.hasPassword ? 'warn-btn' : ''}" download="${project.id}.${format}">
                         [ DOWNLOAD_${format.toUpperCase()} ]
                     </a>
                 </div>
@@ -153,48 +193,80 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize Renders
-    if (typeof MalekConfig !== 'undefined') {
-        renderCerts('certs-list', MalekConfig.certificates, 'certs');
-        renderCerts('education-list', MalekConfig.education, 'education');
-        renderCerts('cv-list', MalekConfig.cv, 'cv');
+    function renderWorkExperience() {
+        const container = document.getElementById('work-experience-list');
+        if (!container || !window.MalekConfig || !Array.isArray(window.MalekConfig.workExperience)) return;
+
+        window.MalekConfig.workExperience.forEach(work => {
+            const card = document.createElement('article');
+            card.className = 'experience-card';
+            const filePath = `work_experience/${work.file}`;
+
+            card.innerHTML = `
+                <div class="experience-card-header">
+                    <div>
+                        <h3 class="experience-title">${work.title}</h3>
+                        <p class="experience-role">${work.role}</p>
+                    </div>
+                    <div class="experience-meta">
+                        <span>${work.company}</span>
+                        <span>${work.dates} · ${work.duration}</span>
+                    </div>
+                </div>
+                <p class="experience-description">${work.description}</p>
+                <a href="${filePath}" class="ghost-btn download-work-btn" download="${work.file}">[ download-work ]</a>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    if (window.MalekConfig) {
+        renderDocumentCards('certs-list', window.MalekConfig.certificates, 'certs');
+        renderDocumentCards('cv-list', window.MalekConfig.cv, 'cv');
+        renderWorkExperience();
         renderProjects();
     }
 
-    // Lightbox Logic (Dynamic delegation)
+    // Document preview for certificates, CV, and professional experience
     const lightbox = document.getElementById('cert-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxPdf = document.getElementById('lightbox-pdf');
     const closeBtn = document.querySelector('.close-lightbox');
 
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('view-cert-btn')) {
-            const src = e.target.getAttribute('data-src');
-            const type = e.target.getAttribute('data-type').toLowerCase();
-
-            if (type === 'png' || type === 'jpg' || type === 'jpeg') {
-                lightboxImg.src = src;
-                lightboxImg.style.display = 'block';
-                lightboxPdf.style.display = 'none';
-            } else if (type === 'pdf') {
-                lightboxPdf.src = src;
-                lightboxPdf.style.display = 'block';
-                lightboxImg.style.display = 'none';
-            }
-
-            lightbox.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+    function openDocument(src, type) {
+        if (!lightbox || !lightboxImg || !lightboxPdf) return;
+        const normalizedType = type.toLowerCase();
+        if (['png', 'jpg', 'jpeg', 'webp'].includes(normalizedType)) {
+            lightboxImg.src = src;
+            lightboxImg.style.display = 'block';
+            lightboxPdf.style.display = 'none';
+        } else {
+            lightboxPdf.src = src;
+            lightboxPdf.style.display = 'block';
+            lightboxImg.style.display = 'none';
         }
+        lightbox.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    document.addEventListener('click', event => {
+        const trigger = event.target.closest('.view-cert-btn');
+        if (!trigger) return;
+        openDocument(trigger.dataset.src, trigger.dataset.type || 'pdf');
     });
 
-    closeBtn.addEventListener('click', () => {
+    function closeDocument() {
+        if (!lightbox) return;
         lightbox.style.display = 'none';
-        lightboxImg.src = '';
-        lightboxPdf.src = '';
+        if (lightboxImg) lightboxImg.src = '';
+        if (lightboxPdf) lightboxPdf.src = '';
         document.body.style.overflow = 'auto';
-    });
+    }
 
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeBtn.click();
-    });
+    if (closeBtn) closeBtn.addEventListener('click', closeDocument);
+    if (lightbox) {
+        lightbox.addEventListener('click', event => {
+            if (event.target === lightbox) closeDocument();
+        });
+    }
 });
