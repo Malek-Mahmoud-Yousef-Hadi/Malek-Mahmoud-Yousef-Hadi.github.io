@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Decipher Effect for Titles (isolated to prevent any interference with clicks)
+    // Decipher Effect for Titles
     const headers = document.querySelectorAll('.section-header');
     headers.forEach(header => {
         const originalText = header.innerText;
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 ${visual}
-                <button class="ghost-btn view-cert-btn" type="button" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
+                <button class="ghost-btn view-cert-btn" data-src="${folder}/${mainFile}" data-type="${type}">[ VIEW ]</button>
             `;
             container.appendChild(card);
         });
@@ -137,17 +137,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProjects() {
         const container = document.getElementById('projects-list');
-        if (!container || !window.MalekConfig || !window.MalekConfig.projects) return;
+        if (!container) return;
 
-        window.MalekConfig.projects.forEach(proj => {
+        MalekConfig.projects.forEach(proj => {
             const row = document.createElement('div');
             row.className = 'project-row';
             
             const format = proj.format || 'zip';
             const filePath = `projects/${proj.id}.${format}`;
 
-            // Pure native link: no target="_blank", no JS interception.
-            // This is the absolute safest way to prevent browser multiple download warnings.
             row.innerHTML = `
                 <span class="proj-name">${proj.name}</span>
                 <div class="download-container">
@@ -172,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'experience-card';
             const filePath = `work_experience/${work.file}`;
 
-            // Pure native link: no target="_blank", no JS interception.
             card.innerHTML = `
                 <div class="experience-card-header">
                     <div>
@@ -195,45 +192,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderInternships() {
+        const container = document.getElementById('internship-list');
+        if (!container || !window.MalekConfig || !Array.isArray(window.MalekConfig.internships)) return;
+
+        window.MalekConfig.internships.forEach(item => {
+            const card = document.createElement('article');
+            card.className = 'experience-card';
+
+            const tasksList = item.tasks.map(t => `<li style="margin-bottom: 0.4rem; list-style-type: square; margin-left: 1.2rem;">${t}</li>`).join('');
+
+            card.innerHTML = `
+                <div class="experience-card-header">
+                    <div>
+                        <h3 class="experience-title">${item.title}</h3>
+                        <p class="experience-role">Field: ${item.field}</p>
+                    </div>
+                    <div class="experience-meta">
+                        <span>${item.company}</span>
+                        <span>${item.dates} · ${item.duration}</span>
+                    </div>
+                </div>
+                <p class="experience-description">${item.description}</p>
+                <div style="margin: 1rem 0; color: var(--ghost-white); font-size: 0.9rem;">
+                    <strong style="color: var(--ghost-green); display: block; margin-bottom: 0.5rem;">Practical Experience:</strong>
+                    <ul style="padding-left: 1rem;">${tasksList}</ul>
+                </div>
+                <p class="experience-description"><strong style="color: var(--ghost-green);">Key Achievement:</strong> ${item.keyAchievement}</p>
+            `;
+            container.appendChild(card);
+        });
+    }
+
     // Initialize Renders
     if (typeof MalekConfig !== 'undefined') {
         renderCerts('certs-list', MalekConfig.certificates, 'certs');
         renderCerts('cv-list', MalekConfig.cv, 'cv');
         renderWorkExperience();
+        renderInternships();
         renderProjects();
     }
 
-    // Lightbox Logic (scoped safely to certs list container)
+    // Lightbox Logic
     const lightbox = document.getElementById('cert-lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxPdf = document.getElementById('lightbox-pdf');
     const closeBtn = document.querySelector('.close-lightbox');
 
-    const certsContainer = document.getElementById('certs-list');
-    const cvContainer = document.getElementById('cv-list');
-
-    function handleViewClick(e) {
+    document.addEventListener('click', (e) => {
         const btn = e.target.closest('.view-cert-btn');
-        if (!btn) return;
-        const src = btn.getAttribute('data-src');
-        const type = btn.getAttribute('data-type').toLowerCase();
+        if (btn) {
+            const src = btn.getAttribute('data-src');
+            const type = btn.getAttribute('data-type').toLowerCase();
 
-        if (type === 'png' || type === 'jpg' || type === 'jpeg') {
-            lightboxImg.src = src;
-            lightboxImg.style.display = 'block';
-            lightboxPdf.style.display = 'none';
-        } else if (type === 'pdf') {
-            lightboxPdf.src = src;
-            lightboxPdf.style.display = 'block';
-            lightboxImg.style.display = 'none';
+            if (type === 'png' || type === 'jpg' || type === 'jpeg') {
+                lightboxImg.src = src;
+                lightboxImg.style.display = 'block';
+                lightboxPdf.style.display = 'none';
+            } else if (type === 'pdf') {
+                lightboxPdf.src = src;
+                lightboxPdf.style.display = 'block';
+                lightboxImg.style.display = 'none';
+            }
+
+            lightbox.style.display = 'block';
+            document.body.style.overflow = 'hidden';
         }
-
-        lightbox.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-
-    if (certsContainer) certsContainer.addEventListener('click', handleViewClick);
-    if (cvContainer) cvContainer.addEventListener('click', handleViewClick);
+    });
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
